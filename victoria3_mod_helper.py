@@ -31,6 +31,7 @@ class Main:
         radio_tier = StringVar()
         radio_writing_mode = StringVar(root,'a+')
         current_political_situation = StringVar()
+        current_fullname = StringVar()
 
         def choose_color():
             # variable to store hexadecimal code of color
@@ -127,8 +128,8 @@ class Main:
         button = ttk.Button(frame, text="Choose Colour", command=choose_color).grid(column=2, row=4)
         colour_label = ttk.Label(frame, textvariable=current_colour).grid(column=3, row=4)
         
-        file_select_button = ttk.Button(frame, text="Select the main directory of your mod", command=select_folder).grid(column=4, row=4)
-        path_label = ttk.Label(frame, textvariable=path_to_main_folder).grid(column=4, row=5)
+        file_select_button = ttk.Button(frame, text="Select the main directory of your mod", command=select_folder).grid(column=3, row=4, columnspan = 2, sticky=W)
+        path_label = ttk.Label(frame, textvariable=path_to_main_folder).grid(column=2, row=5, columnspan = 3, sticky=W)
 
         tag_entry_label = ttk.Label(frame, text="Three letter tag:").grid(column=3,row=0)
         tag_entry = ttk.Entry(frame, textvariable = current_tag).grid(column=4,row=0)
@@ -138,6 +139,9 @@ class Main:
 
         capital_entry_label = ttk.Label(frame, text="Captial state: STATE_").grid(column=3,row=2)
         capital_entry = ttk.Entry(frame, textvariable = current_captial).grid(column=4,row=2)
+
+        fullname_entry_label = ttk.Label(frame, text="Full name of country:").grid(column=3,row=3)
+        fullname_entry = ttk.Entry(frame, textvariable = current_fullname).grid(column=4,row=3)
 
         #ttk.Button(frame, text="Quit", command=root.destroy).grid(column=0, row=4)
 
