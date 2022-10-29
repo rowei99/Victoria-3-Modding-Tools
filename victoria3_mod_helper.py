@@ -65,7 +65,7 @@ class Main:
 
         def create_new_history_country():
             Path(path_to_main_folder.get()+"/common/history/countries").mkdir(parents=True, exist_ok=True)
-            with open (path_to_main_folder.get()+"/common/history/countries/"+current_tag.get().lower()+"_placeholder.txt",radio_writing_mode.get()) as file:
+            with open (path_to_main_folder.get()+"/common/history/countries/"+current_tag.get().lower()+current_fullname.get().lower()+".txt",radio_writing_mode.get()) as file:
                 try:
                     uppercase_tag = current_tag.get().upper()
                 except:
