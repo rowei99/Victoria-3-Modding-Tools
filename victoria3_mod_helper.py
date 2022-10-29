@@ -35,7 +35,7 @@ class Main:
         def choose_color():
             # variable to store hexadecimal code of color
             temp_colour =  str(colorchooser.askcolor(title ="Choose color")[0])
-            current_colour.set("Current colour: " +re.sub("\W", " ", temp_colour))
+            current_colour.set(re.sub("\W", " ", temp_colour))
             
         def select_folder():
             path_to_main_folder.set(filedialog.askdirectory())
@@ -120,7 +120,7 @@ class Main:
         tech_level_dropdown.grid(column=6,row=0)
         tech_level_label = ttk.Label(frame, text="Starting tech level:").grid(column=5,row=0)
 
-        political_situation_dropdown = ttk.Combobox(frame,textvariable=current_political_situation,values=["Traditional","Reactionary","Conservative","Liberal"],state="readonly")
+        political_situation_dropdown = ttk.Combobox(frame,textvariable=current_political_situation,values=["traditional","reactionary","conservative","liberal"],state="readonly")
         political_situation_dropdown.grid(column=6,row=1)
         political_situation_label=ttk.Label(frame, text="Starting politics:").grid(column=5,row=1)
 
