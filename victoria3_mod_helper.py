@@ -29,14 +29,15 @@ class Main:
         """
 
         states_template = \
-        """\ts:STATE_{} = {{
+        """
+    s:{} = {{
         create_state = {{
             country = c:{}
             owned_provinces = {{ {} }}
         }}
-
         
-    }}"""
+    }}
+    """
 
         global string_form_states
         string_form_states = ["yep"]
@@ -235,7 +236,8 @@ class Main:
         tag_reuse_notice_label = ttk.Label(frame,text="Note: the tag entry field above is also used to determine state ownership")
         tag_reuse_notice_label.grid(column=3,row=7,columnspan=4)
 
-        explaining_label = ttk.Label(frame,text="The upper area is used to add new countires to either the history/countries section or to the country_definitions area. \
+        explaining_label = ttk.Label(frame,text=\
+"The upper area is used to add new countires to either the history/countries section or to the country_definitions area. \
 The lower area is used to assign control to state regions to countries. \
 Note that there is no support for split states, and currently no support for homelands, so you will have to add those yourself. \
 The same inputs are used for both when applicable.",justify="center",wraplength=frame.winfo_screenwidth()*0.15)
