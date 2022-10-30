@@ -5,6 +5,15 @@ from tkinter import filedialog
 from pathlib import Path
 from tkinter import messagebox
 import re
+import os
+
+class State:
+    def __init__(self,name,provinces):
+        self.name=name
+        self.provinces=provinces
+
+    def __str__(self):
+        return f"{self.name}"
 
 class Main:
     def __init__(self, root):
@@ -19,11 +28,26 @@ class Main:
 }}
         """
 
+        states_template = \
+        """\ts:STATE_{} = {{
+        create_state = {{
+            country = c:{}
+            owned_provinces = {{ {} }}
+        }}
+
+        {}
+    }}"""
+
+        global string_form_states
+        string_form_states = ["yep"]
+        global list_of_object_form_state_regions 
+        list_of_object_form_state_regions = [State("pingus","dingus")]
         #list_of_tech_effects = []
         list_of_named_tech_levels = ["Very High(UK)","High(Bavaria)","Medium(Argentina)","Low(Qing-ish)","Very Low(Decentralized)"]
         current_cultures = StringVar()
         current_colour = StringVar()
-        path_to_main_folder = StringVar()
+        #Should probably change default before making public
+        path_to_main_folder = StringVar(root,"/Users/rowanevans/Documents/Pythontesting/Mod maker testing")
         current_tag = StringVar()
         current_captial = StringVar()
         current_tech_level = StringVar()
@@ -32,9 +56,11 @@ class Main:
         radio_writing_mode = StringVar(root,'a+')
         current_political_situation = StringVar()
         current_fullname = StringVar()
+        currently_selected_state = StringVar()
+        #state_selection_dropdown_values = StringVar()
 
         def choose_color():
-            # variable to store hexadecimal code of color
+            # variable to store rgb code of color
             temp_colour =  str(colorchooser.askcolor(title ="Choose color")[0])
             current_colour.set(re.sub("\W", " ", temp_colour))
             
@@ -65,7 +91,7 @@ class Main:
 
         def create_new_history_country():
             Path(path_to_main_folder.get()+"/common/history/countries").mkdir(parents=True, exist_ok=True)
-            with open (path_to_main_folder.get()+"/common/history/countries/"+current_tag.get().lower()+current_fullname.get().lower()+".txt",radio_writing_mode.get()) as file:
+            with open (path_to_main_folder.get()+"/common/history/countries/"+current_tag.get().lower()+" - "+current_fullname.get().lower()+".txt",radio_writing_mode.get()) as file:
                 try:
                     uppercase_tag = current_tag.get().upper()
                 except:
@@ -74,6 +100,51 @@ class Main:
                 numeric_tech_value = list_of_named_tech_levels.index(current_tech_level.get())+1
                 file.write(countries_template.format(uppercase_tag,str(numeric_tech_value),current_political_situation.get()))
         
+        def load_states():
+            global list_of_object_form_state_regions
+            global string_form_states
+            list_of_object_form_state_regions = []
+            for state_file in os.listdir(path_to_main_folder.get()+"/map_data/state_regions"):
+                with open(path_to_main_folder.get()+"/map_data/state_regions/"+state_file,"r") as state_region_file:
+                    entire_state_region_as_string = state_region_file.read()
+                    list_of_state_regions = entire_state_region_as_string.split("\n\n")
+                    
+                    for state_region in list_of_state_regions:
+                        split_up_state_region = state_region.split("\n")
+                        
+                        trimmed_state_region = [x for x in split_up_state_region if ("STATE_" in x) or ("provinces" in x)]
+                        
+                        state_name = re.sub("{|\s|=","",trimmed_state_region[0])
+                        
+                        state_provinces = re.sub("provinces = { | }","",trimmed_state_region[1])
+                        list_of_object_form_state_regions.append(State(state_name,state_provinces))
+
+                    print([o.name for o in list_of_object_form_state_regions])
+
+            string_form_states = [str(o) for o in list_of_object_form_state_regions]
+            print(string_form_states)
+            state_selection_dropdown.config(values = string_form_states)
+            print(string_form_states)
+
+        def print_provinces():
+
+            #print(string_form_states)
+            #for i in list_of_object_form_state_regions:
+            #    print(str(i)+"object form")
+            #for i in string_form_states:
+            #    print(i+"string form")
+            #print(currently_selected_state.get()+"thingy")
+            #print(list_of_object_form_state_regions[string_form_states.index(currently_selected_state.get())].provinces)
+
+            for state in list_of_object_form_state_regions:
+                if currently_selected_state.get() == state.name:
+                    #print("dingus")
+                    print(state.provinces)
+                    return
+                print(state.name)
+
+        def print_string_form_states():
+            print(string_form_states)
 
         frame = ttk.Frame(root, padding="3 3 12 12")
         frame.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -148,7 +219,20 @@ class Main:
         write_to_countries_button = ttk.Button(frame, text="Write to countries file", command = write_to_country_definitions).grid(column=1,row=4)
         write_to_history_button = ttk.Button(frame, text="Write to history file", command = create_new_history_country).grid(column=0,row=4)
 
+        seperator_line_one = ttk.Separator(frame, orient="horizontal").grid(column=0,row=6,columnspan=7,sticky="we")
 
+        load_states_button = ttk.Button(frame, text="Load in state files", command=load_states).grid(column=0,row=7)
+        load_states_warning_label = ttk.Label(frame,text="<= THIS WILL PROBABLY TAKE A WHILE").grid(column=1,row=7)
+
+        state_selection_dropdown = ttk.Combobox(frame,textvariable=currently_selected_state,values=[],state="readonly")
+        state_selection_dropdown.grid(column=2,row=7)
+
+        print_provinces_button = ttk.Button(frame, text="print matching provinces", command=print_provinces)
+        print_provinces_button.grid(column=3,row=7)
+
+        testing_button_that_helps_me_test = ttk.Button(frame, text="print string form states", command=print_string_form_states)
+        testing_button_that_helps_me_test.grid(column=4,row=7)
+        
 
 root = Tk()
 Main(root)
