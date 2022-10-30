@@ -47,7 +47,7 @@ class Main:
         current_cultures = StringVar()
         current_colour = StringVar()
         #Should probably change default before making public
-        path_to_main_folder = StringVar(root,"/Users/rowanevans/Documents/Pythontesting/Mod maker testing")
+        path_to_main_folder = StringVar(root,"SELECT YOUR MOD FOLDER")
         current_tag = StringVar()
         current_captial = StringVar()
         current_tech_level = StringVar()
