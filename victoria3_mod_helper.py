@@ -35,14 +35,13 @@ class Main:
             owned_provinces = {{ {} }}
         }}
 
-        {}
+        
     }}"""
 
         global string_form_states
         string_form_states = ["yep"]
         global list_of_object_form_state_regions 
         list_of_object_form_state_regions = [State("pingus","dingus")]
-        #list_of_tech_effects = []
         list_of_named_tech_levels = ["Very High(UK)","High(Bavaria)","Medium(Argentina)","Low(Qing-ish)","Very Low(Decentralized)"]
         current_cultures = StringVar()
         current_colour = StringVar()
@@ -57,7 +56,19 @@ class Main:
         current_political_situation = StringVar()
         current_fullname = StringVar()
         currently_selected_state = StringVar()
-        #state_selection_dropdown_values = StringVar()
+
+        def write_to_states_history():
+            Path(path_to_main_folder.get()+"/common/history/states").mkdir(parents=True, exist_ok=True)
+            for state in list_of_object_form_state_regions:
+                if currently_selected_state.get() == state.name:
+                    matching_provinces = state.provinces
+            with open (path_to_main_folder.get()+"/common/history/states/01_states.txt",radio_writing_mode.get()) as file:
+                try:
+                    uppercase_tag = current_tag.get().upper()
+                except:
+                    messagebox.showerror(title="Bozo",message="Invalid tag")
+                    return
+                file.write(states_template.format(currently_selected_state.get(),uppercase_tag,matching_provinces))
 
         def choose_color():
             # variable to store rgb code of color
@@ -105,46 +116,38 @@ class Main:
             global string_form_states
             list_of_object_form_state_regions = []
             for state_file in os.listdir(path_to_main_folder.get()+"/map_data/state_regions"):
+                if state_file == "99_seas.txt":
+                    continue
                 with open(path_to_main_folder.get()+"/map_data/state_regions/"+state_file,"r") as state_region_file:
                     entire_state_region_as_string = state_region_file.read()
                     list_of_state_regions = entire_state_region_as_string.split("\n\n")
-                    
                     for state_region in list_of_state_regions:
-                        split_up_state_region = state_region.split("\n")
-                        
-                        trimmed_state_region = [x for x in split_up_state_region if ("STATE_" in x) or ("provinces" in x)]
-                        
-                        state_name = re.sub("{|\s|=","",trimmed_state_region[0])
-                        
-                        state_provinces = re.sub("provinces = { | }","",trimmed_state_region[1])
-                        list_of_object_form_state_regions.append(State(state_name,state_provinces))
-
-                    print([o.name for o in list_of_object_form_state_regions])
+                        if not (state_region.isspace() or state_region == ""):
+                            split_up_state_region = state_region.split("\n")
+                            
+                            trimmed_state_region = [x for x in split_up_state_region if ("STATE_" in x) or ("provinces" in x)]
+                            try:
+                                state_name = re.sub("{|\s|=","",trimmed_state_region[0])
+                            except:
+                                print("failed on state name","state region: \"",state_region,"\"",trimmed_state_region,split_up_state_region)
+                                
+                            try:
+                                state_provinces = re.sub("provinces = { | }","",trimmed_state_region[1])
+                            except:
+                                print("failed on provinces",state_region,trimmed_state_region,split_up_state_region)
+                                
+                            list_of_object_form_state_regions.append(State(state_name,state_provinces))
 
             string_form_states = [str(o) for o in list_of_object_form_state_regions]
-            print(string_form_states)
             state_selection_dropdown.config(values = string_form_states)
-            print(string_form_states)
 
         def print_provinces():
-
-            #print(string_form_states)
-            #for i in list_of_object_form_state_regions:
-            #    print(str(i)+"object form")
-            #for i in string_form_states:
-            #    print(i+"string form")
-            #print(currently_selected_state.get()+"thingy")
-            #print(list_of_object_form_state_regions[string_form_states.index(currently_selected_state.get())].provinces)
-
             for state in list_of_object_form_state_regions:
-                if currently_selected_state.get() == state.name:
-                    #print("dingus")
+                if currently_selected_state.get().upper() == state.name:
+                    print(state.name)
                     print(state.provinces)
                     return
-                print(state.name)
-
-        def print_string_form_states():
-            print(string_form_states)
+                
 
         frame = ttk.Frame(root, padding="3 3 12 12")
         frame.grid(column=0, row=0, sticky=(N, W, E, S))
@@ -196,8 +199,8 @@ class Main:
         political_situation_dropdown.grid(column=6,row=1)
         political_situation_label=ttk.Label(frame, text="Starting politics:").grid(column=5,row=1)
 
-        button = ttk.Button(frame, text="Choose Colour", command=choose_color).grid(column=2, row=4)
-        colour_label = ttk.Label(frame, textvariable=current_colour).grid(column=3, row=4)
+        button = ttk.Button(frame, text="Choose Colour", command=choose_color).grid(column=5, row=2)
+        colour_label = ttk.Label(frame, textvariable=current_colour).grid(column=6, row=2)
         
         file_select_button = ttk.Button(frame, text="Select the main directory of your mod", command=select_folder).grid(column=3, row=4, columnspan = 2, sticky=W)
         path_label = ttk.Label(frame, textvariable=path_to_main_folder).grid(column=2, row=5, columnspan = 3, sticky=W)
@@ -216,23 +219,27 @@ class Main:
 
         #ttk.Button(frame, text="Quit", command=root.destroy).grid(column=0, row=4)
 
-        write_to_countries_button = ttk.Button(frame, text="Write to countries file", command = write_to_country_definitions).grid(column=1,row=4)
-        write_to_history_button = ttk.Button(frame, text="Write to history file", command = create_new_history_country).grid(column=0,row=4)
+        write_to_countries_button = ttk.Button(frame, text="Write to country_definitions/countries file", command = write_to_country_definitions).grid(column=0,row=5,columnspan=2,sticky=W)
+        write_to_history_button = ttk.Button(frame, text="Write to history/countries file", command = create_new_history_country).grid(column=0,row=4,columnspan=2,sticky=W)
 
         seperator_line_one = ttk.Separator(frame, orient="horizontal").grid(column=0,row=6,columnspan=7,sticky="we")
 
-        load_states_button = ttk.Button(frame, text="Load in state files", command=load_states).grid(column=0,row=7)
-        load_states_warning_label = ttk.Label(frame,text="<= THIS WILL PROBABLY TAKE A WHILE").grid(column=1,row=7)
+        load_states_button = ttk.Button(frame, text="Load state files", command=load_states).grid(column=0,row=7)
 
-        state_selection_dropdown = ttk.Combobox(frame,textvariable=currently_selected_state,values=[],state="readonly")
-        state_selection_dropdown.grid(column=2,row=7)
+        state_selection_dropdown = ttk.Combobox(frame,textvariable=currently_selected_state,values=[],state="readonly",height="25")
+        state_selection_dropdown.grid(column=1,row=7)
 
-        print_provinces_button = ttk.Button(frame, text="print matching provinces", command=print_provinces)
-        print_provinces_button.grid(column=3,row=7)
+        write_to_states_button = ttk.Button(frame, text="Write to states",command=write_to_states_history)
+        write_to_states_button.grid(column=2,row=7)
 
-        testing_button_that_helps_me_test = ttk.Button(frame, text="print string form states", command=print_string_form_states)
-        testing_button_that_helps_me_test.grid(column=4,row=7)
-        
+        tag_reuse_notice_label = ttk.Label(frame,text="Note: the tag entry field above is also used to determine state ownership")
+        tag_reuse_notice_label.grid(column=3,row=7,columnspan=4)
+
+        explaining_label = ttk.Label(frame,text="The upper area is used to add new countires to either the history/countries section or to the country_definitions area. \
+The lower area is used to assign control to state regions to countries. \
+Note that there is no support for split states, and currently no support for homelands, so you will have to add those yourself. \
+The same inputs are used for both when applicable.",justify="center",wraplength=frame.winfo_screenwidth()*0.15)
+        explaining_label.grid(column=5,row=3,columnspan=2,rowspan=3)
 
 root = Tk()
 Main(root)
